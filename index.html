@@ -31,13 +31,21 @@ html,body{margin:0;background:#e8e3d6}
 .est{font-family:'Old Standard TT',Georgia,serif;font-style:italic;font-size:15px;letter-spacing:.04em;text-align:center;border-top:3px solid var(--ink);border-bottom:1px solid var(--ink);position:relative;padding:7px 4px;margin-top:10px;width:100%}
 .est::before{content:'';position:absolute;left:0;right:0;top:-6px;border-top:1px solid var(--ink)}
 .box{width:min(640px,100%);padding:32px 22px}
-.signin{margin:34px auto 0;max-width:380px;text-align:center}
-.signin label{display:block;font-family:'Rye',Georgia,serif;font-size:26px;margin-bottom:14px}
-.field{display:flex;gap:10px;align-items:stretch}
-.field input{flex:1;min-width:0;font-family:'Old Standard TT',Georgia,serif;font-size:18px;color:var(--ink);background:transparent;border:0;border-bottom:2px solid var(--ink);padding:10px 4px;outline:none;border-radius:0}
-.field input:focus-visible{border-bottom-width:3px}
-.field button{font-family:Oswald,sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.16em;font-size:14px;color:var(--paper);background:var(--ink);border:0;padding:0 20px;min-height:46px;cursor:pointer}
+.signin{margin:30px auto 0;max-width:400px;text-align:center}
+.coupon{position:relative;border:3px double var(--ink);padding:20px 20px 14px;background:rgba(255,255,255,.18)}
+.coupon::before{content:'';position:absolute;inset:5px;border:1px dashed rgba(31,28,24,.45);pointer-events:none}
+.kick{font-family:Oswald,sans-serif;font-size:11px;font-weight:500;letter-spacing:.28em;text-transform:uppercase;color:var(--ink2);display:flex;align-items:center;gap:10px;justify-content:center}
+.kick::before,.kick::after{content:'';flex:0 0 28px;border-top:1px solid var(--ink2)}
+.signin label{display:block;font-family:'Rye',Georgia,serif;font-size:27px;line-height:1.15;margin:8px 0 16px}
+.cap{display:block;text-align:left;font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);margin:0 0 5px 2px}
+.field{display:flex;align-items:stretch;border:2px solid var(--ink);background:#f3efe4;box-shadow:3px 3px 0 var(--ink)}
+.field input{flex:1;min-width:0;font-family:'Old Standard TT',Georgia,serif;font-size:18px;letter-spacing:.06em;color:var(--ink);background:transparent;border:0;padding:12px 12px;outline:none;border-radius:0;min-height:50px}
+.field:focus-within{box-shadow:3px 3px 0 var(--ink),0 0 0 3px rgba(75,70,62,.25)}
+.field button{font-family:Oswald,sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.16em;font-size:14px;color:var(--paper);background:var(--ink);border:0;border-left:2px solid var(--ink);padding:0 20px;cursor:pointer;border-radius:0;-webkit-appearance:none}
+.field button:hover{background:#3a352d}
 .field button:focus-visible{outline:3px solid var(--ink2);outline-offset:3px}
+.msg:empty{display:none}
+.hint{margin:10px 0 0;font-family:'Old Standard TT',Georgia,serif;font-style:italic;font-size:13.5px;color:var(--ink2)}
 .admin-link{position:absolute;right:22px;bottom:18px;font-family:Oswald,sans-serif;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);background:none;border:0;border-bottom:1px solid transparent;padding:8px 2px;cursor:pointer}
 .admin-link:hover{color:var(--ink);border-bottom-color:var(--ink)}
 .admin-link:focus-visible{outline:3px solid var(--ink2);outline-offset:2px}
@@ -99,9 +107,14 @@ html,body{margin:0;background:#e8e3d6}
 </div>
 <div class="est">Established 2011</div>
 <div class="signin">
+<div class="coupon">
+<div class="kick">{{kicker}}</div>
 <label for="pw">{{title}}</label>
-<div class="field"><input id="pw" type="password" autocomplete="current-password" aria-label="{{pwLabel}}" value="{{pw}}" onInput="{{onPw}}" onKeyDown="{{onKey}}"><button type="button" onClick="{{submit}}">Enter</button></div>
+<span class="cap" aria-hidden="true">Password</span>
+<div class="field"><input placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" id="pw" type="password" autocomplete="current-password" aria-label="{{pwLabel}}" value="{{pw}}" onInput="{{onPw}}" onKeyDown="{{onKey}}"><button type="button" onClick="{{submit}}">Enter</button></div>
 <p class="msg" role="status">{{msg}}</p>
+<p class="hint">{{hint}}</p>
+</div>
 </div>
 </div>
 <button class="admin-link" type="button" onClick="{{toggle}}">{{linkText}}</button>
@@ -109,7 +122,7 @@ html,body{margin:0;background:#e8e3d6}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":820}}'>
 // The paper's key, locked once with each password. A wrong password can't open it.
-const KEYS = {"league":{"s":"lGBuKjXVEhmbDboKvzWqzA==","i":"E+GU8DiRYTK3CA5E","c":"MtGRUMLR+1F/BYVhXRlYtpeTEDWLd7k4dj+1kp4kO+pmoT1yN9YkYujuCjKedsLg"},"admin":{"s":"1kA7UCRoA1It/cd90+Ov9w==","i":"3ne6NwoWBn8n4d1K","c":"f3Usq3QWReX9FANSF4WvD3cnh/M3UDjTgATbu/gD2w1OwbFPQ/mmo44bAdIFqRqA"}};
+const KEYS = {"league":{"s":"EBA+HivAUGp44f1OayAXvw==","i":"WZdnUq5I53jV68UV","c":"mHoA0TranTdybJHUJXLp2qUmF1na359qQSB1A/+JPyR38/C7hYrRBwwvvoDrRKWr"},"admin":{"s":"FsERF0vI0e3A1lRimDY0+A==","i":"zFd6nyeOu3AnwaYE","c":"xx6Tpn1G5IUVCKPSl2S3/PUBzUmFASkRxyzyYrLU/q9koNZeh+G2v7o1SdaTirbg"}};
 const ITER = 310000;
 // Where to send people once they're in.
 const NEXT_URL = './tribune.html';
@@ -141,7 +154,9 @@ class Component extends DCLogic {
   renderVals() {
     return {
       pw: this.state.pw, msg: this.state.msg,
-      title: this.state.admin ? 'Admin Sign In:' : 'League Sign In:',
+      title: this.state.admin ? 'Admin Sign In' : 'League Sign In',
+      kicker: this.state.admin ? 'Editors Only' : 'Members Only',
+      hint: this.state.admin ? 'For the folks who write the paper.' : 'Password is in the group chat.',
       pwLabel: this.state.admin ? 'Admin password' : 'League password',
       linkText: this.state.admin ? 'League sign in' : 'Admin',
       toggle: () => this.setState((st) => ({ admin: !st.admin, pw: '', msg: '' })),
