@@ -41,9 +41,8 @@ html,body{margin:0;background:#e8e3d6}
 .field{display:flex;align-items:stretch;border:2px solid var(--ink);background:#f3efe4;box-shadow:3px 3px 0 var(--ink)}
 .field input{flex:1;min-width:0;font-family:'Old Standard TT',Georgia,serif;font-size:18px;letter-spacing:.06em;color:var(--ink);background:transparent;border:0;padding:12px 12px;outline:none;border-radius:0;min-height:50px}
 .field:focus-within{box-shadow:3px 3px 0 var(--ink),0 0 0 3px rgba(75,70,62,.25)}
-.field button{font-family:Oswald,sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.18em;font-size:14px;color:var(--ink);background:#d9d0bb;background-image:linear-gradient(180deg,rgba(255,255,255,.25),rgba(0,0,0,.04));border:0;border-left:2px solid var(--ink);padding:0 20px;cursor:pointer;border-radius:0;-webkit-appearance:none}
-.field button:hover{background:#cdc3ab}
-.field button:active{background:#c3b89e}
+.field button{position:relative;isolation:isolate;font-family:Oswald,sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.18em;font-size:14px;color:#ece6d8;background:transparent;border:0;border-left:2px solid rgba(31,28,24,.85);padding:0 20px;cursor:pointer;border-radius:0;-webkit-appearance:none}.field button::before{content:'';position:absolute;inset:0;z-index:-1;background:#2b2722;opacity:.9;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -16 0 0 0 13.4'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0/140px 140px repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -16 0 0 0 13.4'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0/140px 140px repeat;transition:opacity .15s}.field button:hover::before{opacity:.95}.field button:active::before{opacity:1}
+
 .field button:focus-visible{outline:3px solid var(--ink2);outline-offset:3px}
 .msg:empty{display:none}
 .hint{margin:10px 0 0;font-family:'Old Standard TT',Georgia,serif;font-style:italic;font-size:13.5px;color:var(--ink2)}
@@ -114,7 +113,6 @@ html,body{margin:0;background:#e8e3d6}
 <span class="cap" aria-hidden="true">Password</span>
 <div class="field"><input placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" id="pw" type="password" autocomplete="current-password" aria-label="{{pwLabel}}" value="{{pw}}" onInput="{{onPw}}" onKeyDown="{{onKey}}"><button type="button" onClick="{{submit}}">Enter</button></div>
 <p class="msg" role="status">{{msg}}</p>
-<p class="hint">{{hint}}</p>
 </div>
 </div>
 </div>
@@ -123,7 +121,7 @@ html,body{margin:0;background:#e8e3d6}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":820}}'>
 // The paper's key, locked once with each password. A wrong password can't open it.
-const KEYS = {"league":{"s":"CcD2FUCNAv42pmnbd+Eshw==","i":"Tm1IqcwjTdYEtgYH","c":"GsIcHypO6cc6SZ8zSDfdO8H23YJvhGN8VJ8GGIc0gi13rdNRsl5F/VbhIBdoO6+n"},"admin":[{"s":"dyfRQM2PD3w4p5Xf6sjvBg==","i":"k1GO35KVyJsq5DXB","c":"3FZyQICHHR0n8K4c3Leg5t48RcJoBN/kwPLNBL0WIemdze7yqD7ezrNM8yJxbMqZ"},{"s":"0/n9SnrWWAP44o65TGoVwg==","i":"w/mpdE+RCoNXTAs1","c":"P++kOCQF6DejSiIWCmGH3Ukrtetuuygh4ePau4Gl6E7+Dz2fP/m7YMdux5/01+cS"}]};
+const KEYS = {"league":{"s":"bHddmWJc5cucMN75T88HAg==","i":"w/e6Q1V3l6F4Jo5C","c":"5N5ed/LRV6J1d22sFc09XZg8X0K6HB5H2ZQfEKGfpxbsPdkrPlMywmfjPgB0y8P+"},"admin":[{"s":"BVnLYF3tNZnPdbe+7DI5LQ==","i":"K1RSohv7siCYpmsG","c":"T7xL8/Khg3ynMrKVtTzt+luDSLWB4GkrXB7ZsHcbFrWUvqReK2ZzahUISj6krg8s"},{"s":"A/AL4v1BCssRLtUqJOPyjA==","i":"O6G3bIIlwI/SRdxL","c":"VLKYha0YEGEQniMewdMnvxSwUbCRlPgK+uYVkLKaXGMaKXDI7XyaQlI5SWuJCbhT"}]};
 const ITER = 310000;
 // Where to send people once they're in.
 const NEXT_URL = './tribune.html';
@@ -159,7 +157,6 @@ class Component extends DCLogic {
       pw: this.state.pw, msg: this.state.msg,
       title: this.state.admin ? 'Admin Sign In' : 'League Sign In',
       kicker: this.state.admin ? 'Editors Only' : 'Members Only',
-      hint: this.state.admin ? 'For the folks who write the paper.' : 'Password is in the group chat.',
       pwLabel: this.state.admin ? 'Admin password' : 'League password',
       linkText: this.state.admin ? 'League sign in' : 'Admin',
       toggle: () => this.setState((st) => ({ admin: !st.admin, pw: '', msg: '' })),
