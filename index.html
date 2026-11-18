@@ -41,8 +41,9 @@ html,body{margin:0;background:#e8e3d6}
 .field{display:flex;align-items:stretch;border:2px solid var(--ink);background:#f3efe4;box-shadow:3px 3px 0 var(--ink)}
 .field input{flex:1;min-width:0;font-family:'Old Standard TT',Georgia,serif;font-size:18px;letter-spacing:.06em;color:var(--ink);background:transparent;border:0;padding:12px 12px;outline:none;border-radius:0;min-height:50px}
 .field:focus-within{box-shadow:3px 3px 0 var(--ink),0 0 0 3px rgba(75,70,62,.25)}
-.field button{font-family:Oswald,sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.16em;font-size:14px;color:var(--paper);background:var(--ink);border:0;border-left:2px solid var(--ink);padding:0 20px;cursor:pointer;border-radius:0;-webkit-appearance:none}
-.field button:hover{background:#3a352d}
+.field button{font-family:Oswald,sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.18em;font-size:14px;color:var(--ink);background:#d9d0bb;background-image:linear-gradient(180deg,rgba(255,255,255,.25),rgba(0,0,0,.04));border:0;border-left:2px solid var(--ink);padding:0 20px;cursor:pointer;border-radius:0;-webkit-appearance:none}
+.field button:hover{background:#cdc3ab}
+.field button:active{background:#c3b89e}
 .field button:focus-visible{outline:3px solid var(--ink2);outline-offset:3px}
 .msg:empty{display:none}
 .hint{margin:10px 0 0;font-family:'Old Standard TT',Georgia,serif;font-style:italic;font-size:13.5px;color:var(--ink2)}
@@ -122,7 +123,7 @@ html,body{margin:0;background:#e8e3d6}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":820}}'>
 // The paper's key, locked once with each password. A wrong password can't open it.
-const KEYS = {"league":{"s":"EBA+HivAUGp44f1OayAXvw==","i":"WZdnUq5I53jV68UV","c":"mHoA0TranTdybJHUJXLp2qUmF1na359qQSB1A/+JPyR38/C7hYrRBwwvvoDrRKWr"},"admin":{"s":"FsERF0vI0e3A1lRimDY0+A==","i":"zFd6nyeOu3AnwaYE","c":"xx6Tpn1G5IUVCKPSl2S3/PUBzUmFASkRxyzyYrLU/q9koNZeh+G2v7o1SdaTirbg"}};
+const KEYS = {"league":{"s":"7qppEu5sRa0kksQBwXdS1w==","i":"eVOKa1xkPmQ55MQ/","c":"gBTTftTKgTYmtnETTGhT3bJm+OAx6inwO9Cv2JEPa1/HJGJNqye5bDktpAfMNk+d"},"admin":{"s":"lNaGjVOk2P0WxDBFiCIsUQ==","i":"pTTq6PHkvfgUUclg","c":"eItoGBUB5HAO+0ssyWoqAw6p/ahtUH0a6fnvkSmE2v8c/dSNsOKahHdhcVBbnZDy"}};
 const ITER = 310000;
 // Where to send people once they're in.
 const NEXT_URL = './tribune.html';
