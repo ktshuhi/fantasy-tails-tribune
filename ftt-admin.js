@@ -242,4 +242,135 @@
     '.ftt-key-box input{display:block;width:100%;box-sizing:border-box;margin-top:4px;font:16px Georgia,serif;padding:10px 6px;border:0;border-bottom:2px solid #1f1c18;background:transparent;color:#1f1c18;border-radius:0}';
   var st = document.createElement('style'); st.textContent = css;
   (document.head || document.documentElement).appendChild(st);
+
+  // ---------- views chart (admins only) ----------
+  // Small round button at the bottom left. Opens a panel with a 30-day bar chart
+  // from GoatCounter. Needs a GoatCounter API key with "Read statistics", kept on this device.
+  var GC_SITE = 'https://fantasy-tails-tribune.goatcounter.com';
+  var GC_STORE = 'ftt-gc-key';
+  var DAYS = 30;
+  var CHART = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M3 21h18'/%3E%3Cpath d='M6 17v-5M10 17V7M14 17v-8M18 17V4'/%3E%3C/svg%3E\")";
+  var vcss =
+    '.ftt-vbtn{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:900;width:54px;height:54px;border-radius:50%;border:2px solid #1f1c18;background:#e8e3d6;box-shadow:3px 3px 0 #1f1c18;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}' +
+    '.ftt-vbtn::before{content:"";width:24px;height:24px;background:#1f1c18;-webkit-mask:' + CHART + ' center/contain no-repeat;mask:' + CHART + ' center/contain no-repeat}' +
+    '.ftt-vbtn:focus-visible{outline:3px solid #4b463e;outline-offset:3px}' +
+    '.ftt-vbtn[aria-expanded="true"]{background:#1f1c18}.ftt-vbtn[aria-expanded="true"]::before{background:#e8e3d6}' +
+    '.ftt-vp{position:fixed;left:14px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:900;width:min(340px,calc(100vw - 28px));background:#e8e3d6;color:#1f1c18;border:2px solid #1f1c18;box-shadow:5px 5px 0 #1f1c18;padding:14px 14px 12px;font-family:"Old Standard TT",Georgia,serif}' +
+    '.ftt-vp-k{font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#4b463e}' +
+    '.ftt-vp-n{font-family:Rye,Georgia,serif;font-size:34px;line-height:1.1;margin:2px 0 0}' +
+    '.ftt-vp-sub{font-style:italic;font-size:14px;color:#4b463e;margin:2px 0 10px}' +
+    '.ftt-vp svg{display:block;width:100%;height:96px;overflow:visible}' +
+    '.ftt-vp-ax{display:flex;justify-content:space-between;font-family:Oswald,sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#4b463e;margin-top:4px}' +
+    '.ftt-vp-tip{min-height:18px;font-size:13px;font-style:italic;margin-top:6px}' +
+    '.ftt-vp-ft{display:flex;justify-content:space-between;align-items:center;margin-top:8px;border-top:1px solid #4b463e;padding-top:8px;font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase}' +
+    '.ftt-vp-ft a,.ftt-vp-ft button{color:#1f1c18;background:none;border:0;padding:4px 0;font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer;text-decoration:underline}' +
+    '.ftt-vp-msg{font-size:15px;line-height:1.4}';
+  var vst = document.createElement('style'); vst.textContent = vcss;
+  (document.head || document.documentElement).appendChild(vst);
+
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function fmtDay(d) { var p = String(d).slice(0, 10).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
+
+  function askGcKey(msg) {
+    return new Promise(function (resolve) {
+      var wrap = document.createElement('div');
+      wrap.className = 'ftt-key';
+      wrap.innerHTML =
+        '<div class="ftt-key-box" role="dialog" aria-modal="true" aria-labelledby="ftt-gck-h">' +
+        '<b id="ftt-gck-h">See your views</b>' +
+        '<p>' + (msg || 'Paste a GoatCounter API key once and this device will remember it. Make one in GoatCounter under Settings, API, with "Read statistics" ticked.') + '</p>' +
+        '<label>GoatCounter API key<input class="ftt-key-in" type="password" autocomplete="off"></label>' +
+        '<div class="tc-row"><button type="button" class="tc-b ok ftt-key-ok">Save key</button><button type="button" class="tc-b ftt-key-no">Cancel</button></div>' +
+        '</div>';
+      document.body.appendChild(wrap);
+      var keyIn = wrap.querySelector('.ftt-key-in');
+      setTimeout(function () { keyIn.focus(); }, 30);
+      function done(v) { wrap.remove(); resolve(v); }
+      wrap.querySelector('.ftt-key-ok').onclick = function () { var k = keyIn.value.trim(); if (!k) { keyIn.focus(); return; } ls(GC_STORE, k); done(true); };
+      wrap.querySelector('.ftt-key-no').onclick = function () { done(false); };
+      keyIn.onkeydown = function (e) { if (e.key === 'Enter') wrap.querySelector('.ftt-key-ok').click(); };
+    });
+  }
+
+  function fetchViews() {
+    var end = new Date();
+    var start = new Date(end.getTime() - (DAYS - 1) * 864e5); start.setHours(0, 0, 0, 0);
+    var url = GC_SITE + '/api/v0/stats/total?start=' + encodeURIComponent(start.toISOString()) + '&end=' + encodeURIComponent(end.toISOString());
+    return fetch(url, { cache: 'no-store', headers: { Authorization: 'Bearer ' + ls(GC_STORE), 'Content-Type': 'application/json' } })
+      .then(function (r) {
+        if (r.status === 401 || r.status === 403) { var e = new Error('bad key'); e.code = 'bad_key'; throw e; }
+        if (!r.ok) throw new Error('views ' + r.status);
+        return r.json();
+      })
+      .then(function (j) {
+        var days = (j.stats || []).map(function (s) {
+          var n = typeof s.daily === 'number' ? s.daily : (s.hourly || []).reduce(function (a, b) { return a + (b || 0); }, 0);
+          return { day: s.day, n: n };
+        });
+        var total = typeof j.total === 'number' ? j.total : days.reduce(function (a, d) { return a + d.n; }, 0);
+        return { total: total, days: days };
+      });
+  }
+
+  function chartSvg(days) {
+    var W = 300, H = 96, n = days.length || 1, gap = n > 20 ? 2 : 4, bw = (W - gap * (n - 1)) / n;
+    var max = Math.max.apply(null, days.map(function (d) { return d.n; }).concat([1]));
+    var bars = days.map(function (d, i) {
+      var h = d.n ? Math.max(2, (d.n / max) * (H - 4)) : 1;
+      return '<rect data-i="' + i + '" x="' + (i * (bw + gap)).toFixed(2) + '" y="' + (H - h).toFixed(2) + '" width="' + bw.toFixed(2) + '" height="' + h.toFixed(2) + '" fill="#1f1c18" opacity="' + (i === n - 1 ? 1 : .78) + '"><title>' + esc(fmtDay(d.day) + ': ' + d.n + ' view' + (d.n === 1 ? '' : 's')) + '</title></rect>' +
+        '<rect data-i="' + i + '" x="' + (i * (bw + gap)).toFixed(2) + '" y="0" width="' + (bw + gap).toFixed(2) + '" height="' + H + '" fill="transparent"/>';
+    }).join('');
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Views per day, last ' + DAYS + ' days"><line x1="0" y1="' + H + '" x2="' + W + '" y2="' + H + '" stroke="#4b463e" stroke-width="1"/>' + bars + '</svg>';
+  }
+
+  var vbtn = document.createElement('button');
+  vbtn.type = 'button'; vbtn.className = 'ftt-vbtn';
+  vbtn.setAttribute('aria-label', 'Views'); vbtn.setAttribute('aria-expanded', 'false');
+  var panel = null;
+
+  function closePanel() { if (panel) { panel.remove(); panel = null; } vbtn.setAttribute('aria-expanded', 'false'); }
+  function openPanel() {
+    panel = document.createElement('div');
+    panel.className = 'ftt-vp'; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Views');
+    panel.innerHTML = '<div class="ftt-vp-msg">Counting the house...</div>';
+    document.body.appendChild(panel);
+    vbtn.setAttribute('aria-expanded', 'true');
+    load();
+  }
+  function load() {
+    fetchViews().then(function (v) {
+      if (!panel) return;
+      var today = v.days.length ? v.days[v.days.length - 1].n : 0;
+      panel.innerHTML =
+        '<div class="ftt-vp-k">Views, last ' + DAYS + ' days</div>' +
+        '<div class="ftt-vp-n">' + v.total.toLocaleString() + '</div>' +
+        '<div class="ftt-vp-sub">' + today.toLocaleString() + ' today. Your own visits aren\'t counted.</div>' +
+        chartSvg(v.days) +
+        '<div class="ftt-vp-ax"><span>' + (v.days[0] ? esc(fmtDay(v.days[0].day)) : '') + '</span><span>Today</span></div>' +
+        '<div class="ftt-vp-tip" aria-live="polite"></div>' +
+        '<div class="ftt-vp-ft"><a href="' + GC_SITE + '" target="_blank" rel="noopener">Full stats</a><button type="button" class="ftt-vp-x">Close</button></div>';
+      var tip = panel.querySelector('.ftt-vp-tip');
+      var show = function (e) { var i = e.target.getAttribute && e.target.getAttribute('data-i'); if (i == null) return; var d = v.days[+i]; tip.textContent = fmtDay(d.day) + ': ' + d.n + ' view' + (d.n === 1 ? '' : 's'); };
+      var svg = panel.querySelector('svg');
+      svg.addEventListener('mouseover', show); svg.addEventListener('click', show);
+      panel.querySelector('.ftt-vp-x').onclick = closePanel;
+    }).catch(function (err) {
+      if (!panel) return;
+      if (err && err.code === 'bad_key') {
+        ls(GC_STORE, null); closePanel();
+        askGcKey('GoatCounter turned that key down. Make sure it has "Read statistics" ticked, then paste it again.').then(function (ok) { if (ok) openPanel(); });
+        return;
+      }
+      panel.innerHTML = '<div class="ftt-vp-msg">Couldn\'t reach GoatCounter just now. Try again in a bit.</div><div class="ftt-vp-ft"><a href="' + GC_SITE + '" target="_blank" rel="noopener">Full stats</a><button type="button" class="ftt-vp-x">Close</button></div>';
+      panel.querySelector('.ftt-vp-x').onclick = closePanel;
+    });
+  }
+  vbtn.onclick = function () {
+    if (panel) { closePanel(); return; }
+    if (ls(GC_STORE)) { openPanel(); return; }
+    askGcKey().then(function (ok) { if (ok) openPanel(); });
+  };
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && panel) closePanel(); });
+  function mountV() { document.body.appendChild(vbtn); }
+  if (document.body) mountV(); else document.addEventListener('DOMContentLoaded', mountV);
 })();

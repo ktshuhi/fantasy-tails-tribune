@@ -29,3 +29,7 @@ Live at https://ktshuhi.github.io/fantasy-tails-tribune/
 
 ## Traffic
 GoatCounter: https://fantasy-tails-tribune.goatcounter.com (visits from admin devices are skipped).
+
+When signed in as admin, the round chart button at the bottom left shows views for the
+last 30 days. The first tap asks for a GoatCounter API key (GoatCounter: Settings, API,
+with "Read statistics" ticked). The device remembers it.
