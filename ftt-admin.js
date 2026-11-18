@@ -245,7 +245,7 @@
 
   // ---------- views chart (admins only) ----------
   // Small round button at the bottom left. Opens a panel with a 30-day bar chart
-  // from GoatCounter. Needs a GoatCounter API key with "Read statistics", kept on this device.
+  // from GoatCounter, readers solid and admin visits (paths under /admin) dashed on top. Needs a GoatCounter API key with "Read statistics", kept on this device.
   var GC_SITE = 'https://fantasy-tails-tribune.goatcounter.com';
   var GC_STORE = 'ftt-gc-key';
   var DAYS = 30;
@@ -292,10 +292,11 @@
     });
   }
 
+  function isAdminPath(p) { return /^\/?admin(\/|$)/.test(String(p || '')); }
   function fetchViews() {
     var end = new Date();
     var start = new Date(end.getTime() - (DAYS - 1) * 864e5); start.setHours(0, 0, 0, 0);
-    var url = GC_SITE + '/api/v0/stats/total?start=' + encodeURIComponent(start.toISOString()) + '&end=' + encodeURIComponent(end.toISOString());
+    var url = GC_SITE + '/api/v0/stats/hits?daily=true&limit=100&start=' + encodeURIComponent(start.toISOString()) + '&end=' + encodeURIComponent(end.toISOString());
     return fetch(url, { cache: 'no-store', headers: { Authorization: 'Bearer ' + ls(GC_STORE), 'Content-Type': 'application/json' } })
       .then(function (r) {
         if (r.status === 401 || r.status === 403) { var e = new Error('bad key'); e.code = 'bad_key'; throw e; }
@@ -303,22 +304,43 @@
         return r.json();
       })
       .then(function (j) {
-        var days = (j.stats || []).map(function (s) {
-          var n = typeof s.daily === 'number' ? s.daily : (s.hourly || []).reduce(function (a, b) { return a + (b || 0); }, 0);
-          return { day: s.day, n: n };
+        var byDay = {}, order = [];
+        // every day in range, so quiet days still get a slot
+        for (var t = new Date(start); t <= end; t = new Date(t.getTime() + 864e5)) {
+          var k = t.getFullYear() + '-' + ('0' + (t.getMonth() + 1)).slice(-2) + '-' + ('0' + t.getDate()).slice(-2);
+          if (!byDay[k]) { byDay[k] = { day: k, n: 0, a: 0 }; order.push(k); }
+        }
+        (j.hits || []).forEach(function (h) {
+          if (h.event) return;
+          var admin = isAdminPath(h.path);
+          (h.stats || []).forEach(function (s) {
+            var k = String(s.day).slice(0, 10);
+            var n = typeof s.daily === 'number' ? s.daily : (s.hourly || []).reduce(function (a, b) { return a + (b || 0); }, 0);
+            if (!byDay[k]) { byDay[k] = { day: k, n: 0, a: 0 }; order.push(k); }
+            if (admin) byDay[k].a += n; else byDay[k].n += n;
+          });
         });
-        var total = typeof j.total === 'number' ? j.total : days.reduce(function (a, d) { return a + d.n; }, 0);
-        return { total: total, days: days };
+        order.sort();
+        var days = order.map(function (k) { return byDay[k]; });
+        return {
+          total: days.reduce(function (x, d) { return x + d.n; }, 0),
+          admin: days.reduce(function (x, d) { return x + d.a; }, 0),
+          days: days
+        };
       });
   }
 
+  function dayText(d) { return fmtDay(d.day) + ': ' + d.n + ' reader view' + (d.n === 1 ? '' : 's') + (d.a ? ', ' + d.a + ' admin' : ''); }
   function chartSvg(days) {
     var W = 300, H = 96, n = days.length || 1, gap = n > 20 ? 2 : 4, bw = (W - gap * (n - 1)) / n;
-    var max = Math.max.apply(null, days.map(function (d) { return d.n; }).concat([1]));
+    var max = Math.max.apply(null, days.map(function (d) { return d.n + d.a; }).concat([1]));
     var bars = days.map(function (d, i) {
-      var h = d.n ? Math.max(2, (d.n / max) * (H - 4)) : 1;
-      return '<rect data-i="' + i + '" x="' + (i * (bw + gap)).toFixed(2) + '" y="' + (H - h).toFixed(2) + '" width="' + bw.toFixed(2) + '" height="' + h.toFixed(2) + '" fill="#1f1c18" opacity="' + (i === n - 1 ? 1 : .78) + '"><title>' + esc(fmtDay(d.day) + ': ' + d.n + ' view' + (d.n === 1 ? '' : 's')) + '</title></rect>' +
-        '<rect data-i="' + i + '" x="' + (i * (bw + gap)).toFixed(2) + '" y="0" width="' + (bw + gap).toFixed(2) + '" height="' + H + '" fill="transparent"/>';
+      var x = (i * (bw + gap)).toFixed(2), w = bw.toFixed(2);
+      var hr = d.n ? Math.max(2, (d.n / max) * (H - 4)) : (d.a ? 0 : 1);
+      var ha = d.a ? Math.max(2, (d.a / max) * (H - 4)) : 0;
+      var out = '<rect data-i="' + i + '" x="' + x + '" y="' + (H - hr).toFixed(2) + '" width="' + w + '" height="' + hr.toFixed(2) + '" fill="#1f1c18" opacity="' + (i === n - 1 ? 1 : .8) + '"/>';
+      if (ha) out += '<rect data-i="' + i + '" x="' + x + '" y="' + (H - hr - ha).toFixed(2) + '" width="' + w + '" height="' + ha.toFixed(2) + '" fill="none" stroke="#1f1c18" stroke-width="1" stroke-dasharray="2 1.5" opacity=".7"/>';
+      return out + '<rect data-i="' + i + '" x="' + x + '" y="0" width="' + (bw + gap).toFixed(2) + '" height="' + H + '" fill="transparent"><title>' + esc(dayText(d)) + '</title></rect>';
     }).join('');
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Views per day, last ' + DAYS + ' days"><line x1="0" y1="' + H + '" x2="' + W + '" y2="' + H + '" stroke="#4b463e" stroke-width="1"/>' + bars + '</svg>';
   }
@@ -342,15 +364,15 @@
       if (!panel) return;
       var today = v.days.length ? v.days[v.days.length - 1].n : 0;
       panel.innerHTML =
-        '<div class="ftt-vp-k">Views, last ' + DAYS + ' days</div>' +
+        '<div class="ftt-vp-k">Reader views, last ' + DAYS + ' days</div>' +
         '<div class="ftt-vp-n">' + v.total.toLocaleString() + '</div>' +
-        '<div class="ftt-vp-sub">' + today.toLocaleString() + ' today. Your own visits aren\'t counted.</div>' +
+        '<div class="ftt-vp-sub">' + today.toLocaleString() + ' today. Admin views (dashed): ' + v.admin.toLocaleString() + ', not included.</div>' +
         chartSvg(v.days) +
         '<div class="ftt-vp-ax"><span>' + (v.days[0] ? esc(fmtDay(v.days[0].day)) : '') + '</span><span>Today</span></div>' +
         '<div class="ftt-vp-tip" aria-live="polite"></div>' +
         '<div class="ftt-vp-ft"><a href="' + GC_SITE + '" target="_blank" rel="noopener">Full stats</a><button type="button" class="ftt-vp-x">Close</button></div>';
       var tip = panel.querySelector('.ftt-vp-tip');
-      var show = function (e) { var i = e.target.getAttribute && e.target.getAttribute('data-i'); if (i == null) return; var d = v.days[+i]; tip.textContent = fmtDay(d.day) + ': ' + d.n + ' view' + (d.n === 1 ? '' : 's'); };
+      var show = function (e) { var i = e.target.getAttribute && e.target.getAttribute('data-i'); if (i == null) return; tip.textContent = dayText(v.days[+i]); };
       var svg = panel.querySelector('svg');
       svg.addEventListener('mouseover', show); svg.addEventListener('click', show);
       panel.querySelector('.ftt-vp-x').onclick = closePanel;

@@ -167,7 +167,7 @@ class Component extends DCLogic {
   }
 }
 </script>
-<script>try{if(localStorage.getItem("ftt-admin")==="1")window.goatcounter={no_onload:true};}catch(e){}</script>
+<script>try{if(localStorage.getItem("ftt-admin")==="1")window.goatcounter={path:function(p){return "/admin"+(p||location.pathname);},title:"Admin visit"};}catch(e){}</script>
 <script data-goatcounter="https://fantasy-tails-tribune.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <script src="./ftt-runtime.js"></script>
 </body>

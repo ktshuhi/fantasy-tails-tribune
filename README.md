@@ -28,8 +28,10 @@ Live at https://ktshuhi.github.io/fantasy-tails-tribune/
 3. Commit and push. Pencil edits are kept per edition and are encrypted too.
 
 ## Traffic
-GoatCounter: https://fantasy-tails-tribune.goatcounter.com (visits from admin devices are skipped).
+GoatCounter: https://fantasy-tails-tribune.goatcounter.com. Visits from devices signed in as admin are
+counted separately under paths starting with /admin/, so readers and admins can be told apart.
 
 When signed in as admin, the round chart button at the bottom left shows views for the
-last 30 days. The first tap asks for a GoatCounter API key (GoatCounter: Settings, API,
+last 30 days: readers as solid bars, admin visits dashed on top and left out of
+the total. The first tap asks for a GoatCounter API key (GoatCounter: Settings, API,
 with "Read statistics" ticked). The device remembers it.

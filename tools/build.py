@@ -86,6 +86,10 @@ loader = r"""<style>.ftt-wait{min-height:100vh;display:flex;align-items:center;j
 shell = (head.replace("</head>", loader + "</head>") + "<body>\n<div class=\"ftt-wait\">Unfolding the paper&hellip;</div>\n"
          + '<script id="ftt-data" type="application/octet-stream">' + enc(K, secret.encode()) + "</script>\n"
          + tail + "</body>\n</html>\n")
+# Admin visits are counted under /admin/... so they can be split from readers.
+GC_OLD = '<script>try{if(localStorage.getItem("ftt-admin")==="1")window.goatcounter={no_onload:true};}catch(e){}</script>'
+GC_NEW = '<script>try{if(localStorage.getItem("ftt-admin")==="1")window.goatcounter={path:function(p){return "/admin"+(p||location.pathname);},title:"Admin visit"};}catch(e){}</script>'
+shell = shell.replace(GC_OLD, GC_NEW)
 open(os.path.join(out, "tribune.html"), "w", encoding="utf-8").write(shell)
 
 # ---- index.html ----
@@ -120,6 +124,7 @@ new_check = r"""  async check() {
   }
 """
 ix = re.sub(r"  async check\(\) \{.*?\n  \}\n(?=  renderVals)", lambda m: new_check, ix, flags=re.S)
+ix = ix.replace(GC_OLD, GC_NEW)
 assert "KEYS" in ix and "SHA256" not in ix and "PBKDF2" in ix
 open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(ix)
 print("built", len(shell), "bytes tribune;", len(ix), "bytes index")
