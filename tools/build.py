@@ -5,6 +5,7 @@ python3 build.py SRC_DIR OUT_DIR LEAGUE_PW ADMIN_PW
   so signed-in phones keep working week to week. Otherwise a new one is made.
 - tribune.html: the whole paper (template, code, lead photo) encrypted with K.
 - index.html: K wrapped once with each password (PBKDF2-SHA256 + AES-GCM). No hashes.
+  Extra args after ADMIN_PW = more admin passwords (one per editor).
 """
 import base64, json, os, re, sys
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -30,6 +31,7 @@ def enc(K, data):
     return b64(iv + AESGCM(K).encrypt(iv, data, None))
 
 src, out, LPW, APW = sys.argv[1:5]
+EXTRA = sys.argv[5:]  # more admin passwords (e.g. Doug)
 
 # ---- content key ----
 K = None
@@ -88,7 +90,7 @@ open(os.path.join(out, "tribune.html"), "w", encoding="utf-8").write(shell)
 
 # ---- index.html ----
 ix = open(os.path.join(src, "index.html"), encoding="utf-8").read()
-keys = json.dumps({"league": wrap(K, LPW), "admin": wrap(K, APW)}, separators=(",", ":"))
+keys = json.dumps({"league": wrap(K, LPW), "admin": [wrap(K, pw) for pw in [APW] + EXTRA]}, separators=(",", ":"))
 ix = re.sub(r"// PASSWORD:.*?const ADMIN_PASSWORD_SHA256 = '[0-9a-f]*';\n",
             "// The paper's key, locked once with each password. A wrong password can't open it.\nconst KEYS = " + keys + ";\nconst ITER = " + str(ITER) + ";\n",
             ix, flags=re.S)
@@ -98,12 +100,14 @@ new_check = r"""  async check() {
     this.setState({ msg: 'Checking...' });
     const ub = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
     try {
-      const w = admin ? KEYS.admin : KEYS.league;
+      const list = admin ? [].concat(KEYS.admin) : [KEYS.league];
       const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
-      const kek = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: ub(w.s), iterations: ITER, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
-      let raw;
-      try { raw = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ub(w.i) }, kek, ub(w.c))); }
-      catch (e) { this.setState({ msg: 'Wrong password. Ask the group chat.', pw: '' }); return; }
+      let raw = null;
+      for (const w of list) {
+        const kek = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: ub(w.s), iterations: ITER, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+        try { raw = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ub(w.i) }, kek, ub(w.c))); break; } catch (e) {}
+      }
+      if (!raw) { this.setState({ msg: 'Wrong password. Try again.', pw: '' }); return; }
       let bin = ''; raw.forEach((b) => { bin += String.fromCharCode(b); });
       try {
         localStorage.setItem('ftt-k', btoa(bin));

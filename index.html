@@ -123,7 +123,7 @@ html,body{margin:0;background:#e8e3d6}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":820}}'>
 // The paper's key, locked once with each password. A wrong password can't open it.
-const KEYS = {"league":{"s":"7qppEu5sRa0kksQBwXdS1w==","i":"eVOKa1xkPmQ55MQ/","c":"gBTTftTKgTYmtnETTGhT3bJm+OAx6inwO9Cv2JEPa1/HJGJNqye5bDktpAfMNk+d"},"admin":{"s":"lNaGjVOk2P0WxDBFiCIsUQ==","i":"pTTq6PHkvfgUUclg","c":"eItoGBUB5HAO+0ssyWoqAw6p/ahtUH0a6fnvkSmE2v8c/dSNsOKahHdhcVBbnZDy"}};
+const KEYS = {"league":{"s":"CcD2FUCNAv42pmnbd+Eshw==","i":"Tm1IqcwjTdYEtgYH","c":"GsIcHypO6cc6SZ8zSDfdO8H23YJvhGN8VJ8GGIc0gi13rdNRsl5F/VbhIBdoO6+n"},"admin":[{"s":"dyfRQM2PD3w4p5Xf6sjvBg==","i":"k1GO35KVyJsq5DXB","c":"3FZyQICHHR0n8K4c3Leg5t48RcJoBN/kwPLNBL0WIemdze7yqD7ezrNM8yJxbMqZ"},{"s":"0/n9SnrWWAP44o65TGoVwg==","i":"w/mpdE+RCoNXTAs1","c":"P++kOCQF6DejSiIWCmGH3Ukrtetuuygh4ePau4Gl6E7+Dz2fP/m7YMdux5/01+cS"}]};
 const ITER = 310000;
 // Where to send people once they're in.
 const NEXT_URL = './tribune.html';
@@ -136,12 +136,14 @@ class Component extends DCLogic {
     this.setState({ msg: 'Checking...' });
     const ub = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
     try {
-      const w = admin ? KEYS.admin : KEYS.league;
+      const list = admin ? [].concat(KEYS.admin) : [KEYS.league];
       const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
-      const kek = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: ub(w.s), iterations: ITER, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
-      let raw;
-      try { raw = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ub(w.i) }, kek, ub(w.c))); }
-      catch (e) { this.setState({ msg: 'Wrong password. Ask the group chat.', pw: '' }); return; }
+      let raw = null;
+      for (const w of list) {
+        const kek = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: ub(w.s), iterations: ITER, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+        try { raw = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ub(w.i) }, kek, ub(w.c))); break; } catch (e) {}
+      }
+      if (!raw) { this.setState({ msg: 'Wrong password. Try again.', pw: '' }); return; }
       let bin = ''; raw.forEach((b) => { bin += String.fromCharCode(b); });
       try {
         localStorage.setItem('ftt-k', btoa(bin));

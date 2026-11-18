@@ -10,7 +10,7 @@ Live at https://ktshuhi.github.io/fantasy-tails-tribune/
 - `edits/<edition>.json`: Edits made with the pencil, one file per edition.
 - `manifest.webmanifest`, `apple-touch-icon.png`, `app-icon-*.png`: Home screen app name and icon.
 - `assets/`: Paper texture (photos live inside the encrypted paper).
-- `tools/build.py`: Encrypts a new edition. Needs both passwords; never commit them.
+- `tools/build.py`: Encrypts a new edition. Needs the passwords (league, admin, then one per extra editor); never commit them.
 
 ## Editing (admins)
 1. Sign in with the admin password.
