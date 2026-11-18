@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tribune">
+<meta name="theme-color" content="#e8e3d6">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="./app-icon-192.png?v=2">
+<link rel="icon" type="image/png" sizes="512x512" href="./app-icon-512.png?v=2">
+<title>The Fantasy Tails Tribune</title>
+<link rel="manifest" href="./manifest.webmanifest?v=2">
+<style>x-dc{display:none}</style>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&amp;family=Oswald:wght@400;500;600;700&amp;family=Rye&amp;display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#e8e3d6}
+.pg{--paper:#e8e3d6;--ink:#1f1c18;--ink2:#4b463e;min-height:100vh;box-sizing:border-box;color:var(--ink);background-color:var(--paper);background-image:radial-gradient(ellipse at 15% 8%,rgba(90,70,40,.10),transparent 40%),radial-gradient(ellipse at 88% 70%,rgba(90,70,40,.08),transparent 35%),url(./assets/paper.jpg);background-size:auto,auto,512px 512px;background-blend-mode:multiply,multiply,multiply;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pg *{box-sizing:border-box}
+.pg{position:relative}
+.mast-svg{width:100%;height:auto;display:block;overflow:visible}
+.orn{display:flex;align-items:center;gap:12px;color:var(--ink);width:100%}
+.orn span{flex:1;border-top:3px double var(--ink)}
+.orn i{font-style:normal;font-family:'Old Standard TT',Georgia,serif;font-size:20px;line-height:1}
+.est{font-family:'Old Standard TT',Georgia,serif;font-style:italic;font-size:15px;letter-spacing:.04em;text-align:center;border-top:3px solid var(--ink);border-bottom:1px solid var(--ink);position:relative;padding:7px 4px;margin-top:10px;width:100%}
+.est::before{content:'';position:absolute;left:0;right:0;top:-6px;border-top:1px solid var(--ink)}
+.box{width:min(640px,100%);padding:32px 22px}
+.signin{margin:34px auto 0;max-width:380px;text-align:center}
+.signin label{display:block;font-family:'Rye',Georgia,serif;font-size:26px;margin-bottom:14px}
+.field{display:flex;gap:10px;align-items:stretch}
+.field input{flex:1;min-width:0;font-family:'Old Standard TT',Georgia,serif;font-size:18px;color:var(--ink);background:transparent;border:0;border-bottom:2px solid var(--ink);padding:10px 4px;outline:none;border-radius:0}
+.field input:focus-visible{border-bottom-width:3px}
+.field button{font-family:Oswald,sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.16em;font-size:14px;color:var(--paper);background:var(--ink);border:0;padding:0 20px;min-height:46px;cursor:pointer}
+.field button:focus-visible{outline:3px solid var(--ink2);outline-offset:3px}
+.admin-link{position:absolute;right:22px;bottom:18px;font-family:Oswald,sans-serif;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);background:none;border:0;border-bottom:1px solid transparent;padding:8px 2px;cursor:pointer}
+.admin-link:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.admin-link:focus-visible{outline:3px solid var(--ink2);outline-offset:2px}
+.msg{min-height:22px;margin-top:12px;font-family:'Old Standard TT',Georgia,serif;font-style:italic;font-size:15px;color:var(--ink2)}
+.fine{margin-top:26px;font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2)}
+</style>
+</helmet>
+<div class="pg">
+<div class="box">
+<div class="orn" aria-hidden="true"><span></span><i>❦</i><span></span></div>
+<div style="padding-top: 18px">
+<svg class="mast-svg" viewBox="0 0 1000 250" role="img" aria-label="The Fantasy Tails Tribune">
+<defs>
+<filter id="ftgRough" x="-3%" y="-10%" width="106%" height="120%">
+<feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="warp"></feTurbulence>
+<feDisplacementMap in="SourceGraphic" in2="warp" scale="3.5" xChannelSelector="R" yChannelSelector="G" result="warped"></feDisplacementMap>
+<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="9" result="spk"></feTurbulence>
+<feColorMatrix in="spk" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  10 0 0 0 -6.1" result="holes"></feColorMatrix>
+<feComposite in="warped" in2="holes" operator="out"></feComposite>
+</filter>
+<filter id="ftgOld" x="-3%" y="-12%" width="106%" height="124%">
+<feMorphology operator="dilate" radius="0.7" in="SourceGraphic" result="fat"></feMorphology>
+<feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="7" result="warp"></feTurbulence>
+<feDisplacementMap in="fat" in2="warp" scale="5" xChannelSelector="R" yChannelSelector="G" result="warped"></feDisplacementMap>
+<feGaussianBlur in="warped" stdDeviation="0.6" result="soft"></feGaussianBlur>
+<feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="11" result="spk"></feTurbulence>
+<feColorMatrix in="spk" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  14 0 0 0 -8.2" result="holes"></feColorMatrix>
+<feComposite in="soft" in2="holes" operator="out"></feComposite>
+</filter>
+</defs>
+<g style="filter: url(#ftgRough)">
+<g transform="translate(172,72) scale(-0.86,0.86)">
+<path d="M22 22 C 8 50, 14 92, 50 108 C 90 124, 140 104, 168 66 C 178 50, 188 30, 198 8 C 176 14, 160 18, 146 28 L 150 18 L 132 32 L 128 24 L 112 40 C 96 54, 72 62, 54 58 C 40 54, 30 42, 22 22 Z" style="fill: var(--ink)"></path>
+<path d="M30 40 C 34 70, 52 90, 86 94 L 72 86 L 96 84 C 70 78, 48 62, 38 46 Z" style="fill: var(--paper); opacity: .38"></path>
+<path d="M40 30 C 46 46, 60 54, 80 56 L 70 48 L 90 50 C 70 44, 54 38, 40 30 Z" style="fill: var(--paper); opacity: .6"></path>
+<path d="M198 8 C 188 30, 178 50, 168 66 C 156 82, 142 92, 126 98 L 132 84 L 116 88 L 128 70 L 114 72 L 124 56 C 118 50, 114 46, 112 40 L 128 24 L 132 32 L 150 18 L 146 28 C 160 18, 176 14, 198 8 Z" style="fill: var(--paper); stroke: var(--ink); stroke-width: 3; stroke-linejoin: round"></path>
+<path d="M190 16 C 180 34, 170 52, 158 66 L 162 54 L 150 60" style="fill: none; stroke: var(--ink); stroke-width: 1.5; opacity: .5"></path>
+</g>
+<g transform="translate(828,72) scale(0.86,0.86)">
+<path d="M22 22 C 8 50, 14 92, 50 108 C 90 124, 140 104, 168 66 C 178 50, 188 30, 198 8 C 176 14, 160 18, 146 28 L 150 18 L 132 32 L 128 24 L 112 40 C 96 54, 72 62, 54 58 C 40 54, 30 42, 22 22 Z" style="fill: var(--ink)"></path>
+<path d="M30 40 C 34 70, 52 90, 86 94 L 72 86 L 96 84 C 70 78, 48 62, 38 46 Z" style="fill: var(--paper); opacity: .38"></path>
+<path d="M40 30 C 46 46, 60 54, 80 56 L 70 48 L 90 50 C 70 44, 54 38, 40 30 Z" style="fill: var(--paper); opacity: .6"></path>
+<path d="M198 8 C 188 30, 178 50, 168 66 C 156 82, 142 92, 126 98 L 132 84 L 116 88 L 128 70 L 114 72 L 124 56 C 118 50, 114 46, 112 40 L 128 24 L 132 32 L 150 18 L 146 28 C 160 18, 176 14, 198 8 Z" style="fill: var(--paper); stroke: var(--ink); stroke-width: 3; stroke-linejoin: round"></path>
+<path d="M190 16 C 180 34, 170 52, 158 66 L 162 54 L 150 60" style="fill: none; stroke: var(--ink); stroke-width: 1.5; opacity: .5"></path>
+</g>
+<g style="fill: var(--ink)">
+<text x="500" y="92" textLength="640" lengthAdjust="spacing" style="font-family: 'Rye', Georgia, serif; font-size: 56px; text-anchor: middle">The Fantasy Tails</text>
+<text x="500" y="230" textLength="560" lengthAdjust="spacing" style="font-family: 'Rye', Georgia, serif; font-size: 116px; text-anchor: middle">Tribune</text>
+</g>
+<g style="fill: none; stroke: var(--ink); stroke-width: 2">
+<line x1="250" y1="111" x2="440" y2="111"></line><line x1="250" y1="117" x2="440" y2="117" style="stroke-width: 1"></line>
+<line x1="560" y1="111" x2="750" y2="111"></line><line x1="560" y1="117" x2="750" y2="117" style="stroke-width: 1"></line>
+<path d="M440 114 l10 -6 l10 6 l-10 6 Z M540 114 l10 -6 l10 6 l-10 6 Z" style="fill: var(--ink)"></path>
+<path d="M470 114 C 480 106, 492 106, 500 114 C 508 122, 520 122, 530 114 M470 114 C 480 122, 492 122, 500 114 C 508 106, 520 106, 530 114" style="stroke-width: 2"></path>
+</g>
+</g>
+</svg>
+
+</div>
+<div class="est">Established 2011</div>
+<div class="signin">
+<label for="pw">{{title}}</label>
+<div class="field"><input id="pw" type="password" autocomplete="current-password" aria-label="{{pwLabel}}" value="{{pw}}" onInput="{{onPw}}" onKeyDown="{{onKey}}"><button type="button" onClick="{{submit}}">Enter</button></div>
+<p class="msg" role="status">{{msg}}</p>
+</div>
+</div>
+<button class="admin-link" type="button" onClick="{{toggle}}">{{linkText}}</button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":820}}'>
+// The paper's key, locked once with each password. A wrong password can't open it.
+const KEYS = {"league":{"s":"lGBuKjXVEhmbDboKvzWqzA==","i":"E+GU8DiRYTK3CA5E","c":"MtGRUMLR+1F/BYVhXRlYtpeTEDWLd7k4dj+1kp4kO+pmoT1yN9YkYujuCjKedsLg"},"admin":{"s":"1kA7UCRoA1It/cd90+Ov9w==","i":"3ne6NwoWBn8n4d1K","c":"f3Usq3QWReX9FANSF4WvD3cnh/M3UDjTgATbu/gD2w1OwbFPQ/mmo44bAdIFqRqA"}};
+const ITER = 310000;
+// Where to send people once they're in.
+const NEXT_URL = './tribune.html';
+const ADMIN_URL = './tribune.html';
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { pw: '', msg: '', admin: false }; }
+  async check() {
+    const pw = this.state.pw; const admin = this.state.admin;
+    if (!pw) { this.setState({ msg: admin ? 'Enter the admin password.' : 'Enter the league password.' }); return; }
+    this.setState({ msg: 'Checking...' });
+    const ub = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+    try {
+      const w = admin ? KEYS.admin : KEYS.league;
+      const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+      const kek = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: ub(w.s), iterations: ITER, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+      let raw;
+      try { raw = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ub(w.i) }, kek, ub(w.c))); }
+      catch (e) { this.setState({ msg: 'Wrong password. Ask the group chat.', pw: '' }); return; }
+      let bin = ''; raw.forEach((b) => { bin += String.fromCharCode(b); });
+      try {
+        localStorage.setItem('ftt-k', btoa(bin));
+        localStorage.setItem('ftt-ok', '1');
+        if (admin) localStorage.setItem('ftt-admin', '1'); else localStorage.removeItem('ftt-admin');
+      } catch (e) {}
+      this.setState({ msg: 'Welcome in.' });
+      window.location.href = admin ? ADMIN_URL : NEXT_URL;
+    } catch (e) { this.setState({ msg: 'Something went wrong. Try again.' }); }
+  }
+  renderVals() {
+    return {
+      pw: this.state.pw, msg: this.state.msg,
+      title: this.state.admin ? 'Admin Sign In:' : 'League Sign In:',
+      pwLabel: this.state.admin ? 'Admin password' : 'League password',
+      linkText: this.state.admin ? 'League sign in' : 'Admin',
+      toggle: () => this.setState((st) => ({ admin: !st.admin, pw: '', msg: '' })),
+      onPw: (e) => this.setState({ pw: e && e.target ? e.target.value : '' }),
+      onKey: (e) => { if (e && e.key === 'Enter') this.check(); },
+      submit: () => this.check()
+    };
+  }
+}
+</script>
+<script>try{if(localStorage.getItem("ftt-admin")==="1")window.goatcounter={no_onload:true};}catch(e){}</script>
+<script data-goatcounter="https://fantasy-tails-tribune.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script src="./ftt-runtime.js"></script>
+</body>
+</html>
