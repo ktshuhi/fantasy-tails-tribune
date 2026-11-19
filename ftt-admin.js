@@ -395,4 +395,18 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && panel) closePanel(); });
   function mountV() { document.body.appendChild(vbtn); }
   if (document.body) mountV(); else document.addEventListener('DOMContentLoaded', mountV);
+
+  // ---------- archive (admins only) ----------
+  // On an archived edition (tribune-<edition>.html) show a small "Back to the archive" tab.
+  if (/\/tribune-[^/]+\.html$/.test(location.pathname)) {
+    var acss = '.ftt-arch{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:900;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;background:#1f1c18;color:#e8e3d6;border:2px solid #1f1c18;box-shadow:3px 3px 0 rgba(0,0,0,.25);font-family:Oswald,sans-serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;white-space:nowrap}' +
+      '.ftt-arch:focus-visible{outline:3px solid #4b463e;outline-offset:3px}';
+    var ast = document.createElement('style'); ast.textContent = acss;
+    (document.head || document.documentElement).appendChild(ast);
+    var arch = document.createElement('a');
+    arch.className = 'ftt-arch'; arch.href = './archive.html';
+    arch.textContent = '‹ Archived edition · Back to the archive';
+    var mountA = function () { document.body.appendChild(arch); };
+    if (document.body) mountA(); else document.addEventListener('DOMContentLoaded', mountA);
+  }
 })();

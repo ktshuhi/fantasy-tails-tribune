@@ -10,6 +10,8 @@ Live at https://ktshuhi.github.io/fantasy-tails-tribune/
 - `edits/<edition>.json`: Edits made with the pencil, one file per edition.
 - `manifest.webmanifest`, `apple-touch-icon.png`, `app-icon-*.png`: Home screen app name and icon.
 - `assets/`: Paper texture (photos live inside the encrypted paper).
+- `archive.html`: Back issues, admins only. Readers who open it are sent to the paper.
+- `tribune-<edition>.html`: Archived editions, kept exactly as they ran (same key, so they still open).
 - `tools/build.py`: Encrypts a new edition. Needs the passwords (league, admin, then one per extra editor); never commit them.
 
 ## Editing (admins)
@@ -21,6 +23,7 @@ Live at https://ktshuhi.github.io/fantasy-tails-tribune/
    Edits show for everyone within about a minute.
 
 ## New edition each week
+Before building, save the current paper as an archive copy: copy tribune.html to tribune-<its edition>.html (e.g. tribune-2026-week-11-vol-2.html), then add it to the EDITIONS list at the bottom of archive.html, newest first, and move "current: true" to the new edition.
 1. Put the new export next to the plain-text sources (not in this repo), with the
    `ftt-edition` meta set to a new value (e.g. `2026-week-12`).
 2. Run `python3 tools/build.py SRC_DIR . LEAGUE_PASSWORD ADMIN_PASSWORD`.
