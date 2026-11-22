@@ -1,0 +1,25 @@
+# Sends a push notification when an admin taps "Notify readers" in the Tribune.
+# The admin tool commits notify/send.json; this passes its message to OneSignal.
+# Needs two repository secrets: ONESIGNAL_APP_ID and ONESIGNAL_REST_KEY.
+name: Notify readers
+on:
+  push:
+    branches: [main]
+    paths: [notify/send.json]
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Send push
+        env:
+          APP_ID: ${{ secrets.ONESIGNAL_APP_ID }}
+          REST_KEY: ${{ secrets.ONESIGNAL_REST_KEY }}
+        run: |
+          if [ -z "$APP_ID" ] || [ -z "$REST_KEY" ]; then echo "OneSignal secrets are not set up yet."; exit 1; fi
+          jq -n --arg app "$APP_ID" --slurpfile n notify/send.json '{
+            app_id: $app, target_channel: "push", included_segments: ["Total Subscriptions"],
+            headings: {en: "The Fantasy Tails Tribune"}, contents: {en: $n[0].message}, url: $n[0].url
+          }' > body.json
+          curl -sS --fail-with-body -X POST https://api.onesignal.com/notifications \
+            -H "Authorization: Key $REST_KEY" -H "Content-Type: application/json" --data @body.json

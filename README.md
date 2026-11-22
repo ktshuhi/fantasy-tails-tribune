@@ -42,5 +42,11 @@ with "Read statistics" ticked). The device remembers it.
 Saved app (home screen)
 
 - The "Put the Tribune on your phone" tip shows once per visit and never inside the saved app. (iPhones can't tell Safari whether the app is already saved, so someone who saved it but opens a link in Safari can still see the tip once.)
-- Opening the saved app is counted in GoatCounter as the event "app-open", once per device per day. That is the count of people using the saved app.
+- Extra tracking (tribune-tracking.js, on every page, invisible): homescreen-launch, homescreen-first-launch (new saved-app users), browser-launch, pwa-installed (Android), notify-me-click, notify-granted/denied. Admin devices only send admin-signin.
 - Notifications are offered only inside the saved app, only to people who haven't turned them on, and not again for 7 days after "Not now". They run through OneSignal (free): create a Web app at onesignal.com with site URL https://ktshuhi.github.io/fantasy-tails-tribune, paste its App ID into ONESIGNAL_APP_ID in the edition source, rebuild. Send pushes from the OneSignal dashboard. OneSignalSDKWorker.js must stay in the repo root. iPhones need iOS 16.4 or later and the app saved to the home screen.
+
+Admin menu (round button above the views chart, admins only)
+
+- Archive: opens the back issues.
+- Notify readers (current edition only): writes notify/send.json to the repo; the "Notify readers" GitHub workflow sends it through OneSignal. Needs repository secrets ONESIGNAL_APP_ID and ONESIGNAL_REST_KEY (GitHub: Settings, Secrets and variables, Actions).
+- Sign out: removes the paper key and admin flag from this device and returns to the sign-in page. The GitHub and GoatCounter keys stay on the device.

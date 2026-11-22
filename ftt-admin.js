@@ -396,6 +396,106 @@
   function mountV() { document.body.appendChild(vbtn); }
   if (document.body) mountV(); else document.addEventListener('DOMContentLoaded', mountV);
 
+  // ---------- admin menu: archive, notify readers, sign out (admins only) ----------
+  // A round button above the views chart. Notifications are sent by committing notify/send.json;
+  // the GitHub workflow .github/workflows/notify.yml passes it to OneSignal (key kept in GitHub secrets).
+  var MENU = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 7h16M4 12h16M4 17h16'/%3E%3C/svg%3E\")";
+  var mcss =
+    '.ftt-mbtn{position:fixed;left:14px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:899;width:54px;height:54px;border-radius:50%;border:2px solid #1f1c18;background:#e8e3d6;box-shadow:3px 3px 0 #1f1c18;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}' +
+    '.ftt-mbtn::before{content:"";width:24px;height:24px;background:#1f1c18;-webkit-mask:' + MENU + ' center/contain no-repeat;mask:' + MENU + ' center/contain no-repeat}' +
+    '.ftt-mbtn[aria-expanded="true"]{background:#1f1c18}.ftt-mbtn[aria-expanded="true"]::before{background:#e8e3d6}' +
+    '.ftt-mbtn:focus-visible{outline:3px solid #4b463e;outline-offset:3px}' +
+    '.ftt-mp{position:fixed;left:14px;bottom:calc(146px + env(safe-area-inset-bottom));z-index:901;width:min(320px,calc(100vw - 28px));background:#e8e3d6;color:#1f1c18;border:2px solid #1f1c18;box-shadow:5px 5px 0 #1f1c18;padding:6px 0;font-family:Oswald,sans-serif}' +
+    '.ftt-mp a,.ftt-mp>button{display:flex;align-items:center;width:100%;min-height:48px;padding:0 16px;box-sizing:border-box;background:none;border:0;border-bottom:1px dotted #4b463e;color:#1f1c18;font:500 14px Oswald,sans-serif;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;cursor:pointer;text-align:left}' +
+    '.ftt-mp>:last-child{border-bottom:0}.ftt-mp a:hover,.ftt-mp>button:hover{background:#ddd6c4}' +
+    '.ftt-np{padding:12px 16px 14px;border-bottom:1px dotted #4b463e}' +
+    '.ftt-np label{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#4b463e;margin-bottom:6px}' +
+    '.ftt-np textarea{display:block;width:100%;box-sizing:border-box;min-height:70px;font:16px "Old Standard TT",Georgia,serif;padding:8px;border:1px solid #1f1c18;background:transparent;color:#1f1c18;resize:vertical}' +
+    '.ftt-np .ftt-nrow{display:flex;gap:8px;margin-top:10px}' +
+    '.ftt-np .ftt-nrow button{min-height:40px;padding:0 12px;border:2px solid #1f1c18;background:#1f1c18;color:#e8e3d6;font:500 12px Oswald,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}' +
+    '.ftt-np .ftt-nrow button.lite{background:transparent;color:#1f1c18}' +
+    '.ftt-np .ftt-nmsg{margin:8px 0 0;font:italic 14px "Old Standard TT",Georgia,serif}';
+  var mst = document.createElement('style'); mst.textContent = mcss;
+  (document.head || document.documentElement).appendChild(mst);
+
+  function editionLabel() {
+    var m = /week-(\d+)(?:-vol-(\d+))?/.exec(EDITION);
+    if (!m) return 'A new edition';
+    return 'Week ' + m[1] + ', Volume ' + (m[2] || '1');
+  }
+  function sendNotice(text) {
+    var path = 'notify/send.json';
+    var url = 'https://api.github.com/repos/' + repo() + '/contents/' + path;
+    var h = function () { return { Authorization: 'Bearer ' + ls(KEY_STORE), Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }; };
+    return withKey(function () {
+      return fetch(url + '?ref=' + BRANCH + '&t=' + Date.now(), { cache: 'no-store', headers: h() }).then(function (r) {
+        if (r.status === 401 || r.status === 403) { var e = new Error('bad key'); e.code = 'bad_key'; throw e; }
+        return r.status === 404 ? null : r.json();
+      }).then(function (cur) {
+        var payload = { message: text, edition: EDITION, url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'tribune.html', at: new Date().toISOString(), by: ls(NAME_STORE) || 'Editor' };
+        var body = { message: 'Notify readers: ' + text, branch: BRANCH, content: b64enc(JSON.stringify(payload, null, 2) + '\n') };
+        if (cur && cur.sha) body.sha = cur.sha;
+        return fetch(url, { method: 'PUT', headers: h(), body: JSON.stringify(body) });
+      }).then(function (r) {
+        if (r.status === 401 || r.status === 403) { var e = new Error('bad key'); e.code = 'bad_key'; throw e; }
+        if (!r.ok) { var e2 = new Error('write ' + r.status); e2.code = 'unavailable'; throw e2; }
+        return true;
+      });
+    });
+  }
+  function signOut() {
+    ['ftt-k', 'ftt-ok', 'ftt-admin', 'tribune-is-admin'].forEach(function (k) { ls(k, null); });
+    try { sessionStorage.removeItem('tribune-admin-counted'); } catch (e) {}
+    location.replace('./index.html');
+  }
+
+  var mbtn = document.createElement('button');
+  mbtn.type = 'button'; mbtn.className = 'ftt-mbtn';
+  mbtn.setAttribute('aria-label', 'Admin menu'); mbtn.setAttribute('aria-expanded', 'false');
+  var mp = null;
+  function closeMenu() { if (mp) { mp.remove(); mp = null; } mbtn.setAttribute('aria-expanded', 'false'); }
+  function openMenu() {
+    mp = document.createElement('div');
+    mp.className = 'ftt-mp'; mp.setAttribute('role', 'menu');
+    mp.innerHTML = '<a href="./archive.html" role="menuitem">Archive</a>' +
+      (/\/tribune-[^/]+\.html$/.test(location.pathname) ? '' : '<button type="button" class="ftt-m-notify" role="menuitem">Notify readers</button>') +
+      '<button type="button" class="ftt-m-out" role="menuitem">Sign out</button>';
+    document.body.appendChild(mp);
+    mbtn.setAttribute('aria-expanded', 'true');
+    mp.querySelector('.ftt-m-out').onclick = signOut;
+    var nb = mp.querySelector('.ftt-m-notify');
+    if (nb) nb.onclick = function () {
+      var np = document.createElement('div'); np.className = 'ftt-np';
+      np.innerHTML = '<label for="ftt-ntext">Push to everyone who turned on notifications</label>' +
+        '<textarea id="ftt-ntext"></textarea>' +
+        '<div class="ftt-nrow"><button type="button" class="ftt-nsend">Send to everyone</button><button type="button" class="lite ftt-ncancel">Cancel</button></div>' +
+        '<p class="ftt-nmsg" hidden></p>';
+      this.replaceWith(np);
+      var ta = np.querySelector('textarea'), msg = np.querySelector('.ftt-nmsg'), send = np.querySelector('.ftt-nsend');
+      ta.value = editionLabel() + ' of the Fantasy Tails Tribune is now available.';
+      ta.focus();
+      np.querySelector('.ftt-ncancel').onclick = closeMenu;
+      send.onclick = function () {
+        var text = ta.value.trim(); if (!text) { ta.focus(); return; }
+        if (send.getAttribute('data-sure') !== '1') { send.setAttribute('data-sure', '1'); send.textContent = 'Tap again to send'; return; }
+        send.disabled = true; send.textContent = 'Sending…';
+        sendNotice(text).then(function () {
+          msg.hidden = false; msg.textContent = 'Sent. Phones should buzz within a minute or two.';
+          send.textContent = 'Sent'; setTimeout(closeMenu, 2500);
+        }).catch(function (e) {
+          send.disabled = false; send.removeAttribute('data-sure'); send.textContent = 'Send to everyone';
+          if (e && e.code === 'cancelled') return;
+          msg.hidden = false; msg.textContent = 'Couldn\'t send. Check your connection and try again.';
+        });
+      };
+    };
+  }
+  mbtn.onclick = function () { if (mp) closeMenu(); else openMenu(); };
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && mp) closeMenu(); });
+  document.addEventListener('click', function (e) { if (mp && e.target.isConnected && !mp.contains(e.target) && e.target !== mbtn) closeMenu(); });
+  function mountM() { document.body.appendChild(mbtn); }
+  if (document.body) mountM(); else document.addEventListener('DOMContentLoaded', mountM);
+
   // ---------- archive (admins only) ----------
   // On an archived edition (tribune-<edition>.html) show a small "Back to the archive" tab.
   if (/\/tribune-[^/]+\.html$/.test(location.pathname)) {
