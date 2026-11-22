@@ -38,3 +38,9 @@ When signed in as admin, the round chart button at the bottom left shows views f
 last 30 days: readers as solid bars, admin visits dashed on top and left out of
 the total. The first tap asks for a GoatCounter API key (GoatCounter: Settings, API,
 with "Read statistics" ticked). The device remembers it.
+
+Saved app (home screen)
+
+- The "Put the Tribune on your phone" tip shows once per visit and never inside the saved app. (iPhones can't tell Safari whether the app is already saved, so someone who saved it but opens a link in Safari can still see the tip once.)
+- Opening the saved app is counted in GoatCounter as the event "app-open", once per device per day. That is the count of people using the saved app.
+- Notifications are offered only inside the saved app, only to people who haven't turned them on, and not again for 7 days after "Not now". They run through OneSignal (free): create a Web app at onesignal.com with site URL https://ktshuhi.github.io/fantasy-tails-tribune, paste its App ID into ONESIGNAL_APP_ID in the edition source, rebuild. Send pushes from the OneSignal dashboard. OneSignalSDKWorker.js must stay in the repo root. iPhones need iOS 16.4 or later and the app saved to the home screen.

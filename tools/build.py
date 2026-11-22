@@ -1,6 +1,7 @@
 """Encrypt The Fantasy Tails Tribune for publishing.
 
-python3 build.py SRC_DIR OUT_DIR LEAGUE_PW ADMIN_PW
+python3 build.py SRC_DIR OUT_DIR LEAGUE_PW [ADMIN_PW ...]
+- Weekly: pass just the league password; the sign-in page and every editor password stay as they are.
 - Content key K: reused from OUT_DIR/index.html if the league password unlocks it,
   so signed-in phones keep working week to week. Otherwise a new one is made.
 - tribune.html: the whole paper (template, code, lead photo) encrypted with K.
@@ -30,8 +31,10 @@ def enc(K, data):
     iv = os.urandom(12)
     return b64(iv + AESGCM(K).encrypt(iv, data, None))
 
-src, out, LPW, APW = sys.argv[1:5]
-EXTRA = sys.argv[5:]  # more admin passwords (e.g. Doug)
+args = [a for a in sys.argv[1:] if a != "--new-key"]
+src, out, LPW = args[0:3]
+APW = args[3] if len(args) > 3 else None  # only needed when the sign-in page is rebuilt from its template
+EXTRA = args[4:]  # more admin passwords (e.g. Doug)  # more admin passwords (e.g. Doug)
 
 # ---- content key ----
 K = None
@@ -42,7 +45,10 @@ if os.path.exists(old):
         try:
             K = unwrap(json.loads(m.group(1))["league"], LPW); print("reusing content key")
         except Exception:
-            print("old key did not unlock; making a new one")
+            if "--new-key" not in sys.argv:
+                sys.exit("STOPPED: the league password did not unlock the current paper. Check it and run again.\n"
+                         "(Nothing was changed. Only add --new-key if you really mean to sign everyone out.)")
+            print("old key did not unlock; making a new one (--new-key)")
 if K is None:
     K = AESGCM.generate_key(bit_length=256)
 
@@ -94,8 +100,10 @@ open(os.path.join(out, "tribune.html"), "w", encoding="utf-8").write(shell)
 
 # ---- index.html ----
 ix = open(os.path.join(src, "index.html"), encoding="utf-8").read()
-keys = json.dumps({"league": wrap(K, LPW), "admin": [wrap(K, pw) for pw in [APW] + EXTRA]}, separators=(",", ":"))
-ix = re.sub(r"// PASSWORD:.*?const ADMIN_PASSWORD_SHA256 = '[0-9a-f]*';\n",
+if "// PASSWORD:" in ix and not APW:
+    sys.exit("STOPPED: this sign-in page is a template, so the admin password is needed too.")
+keys = json.dumps({"league": wrap(K, LPW), "admin": [wrap(K, pw) for pw in [APW] + EXTRA]}, separators=(",", ":")) if APW else None
+if keys: ix = re.sub(r"// PASSWORD:.*?const ADMIN_PASSWORD_SHA256 = '[0-9a-f]*';\n",
             "// The paper's key, locked once with each password. A wrong password can't open it.\nconst KEYS = " + keys + ";\nconst ITER = " + str(ITER) + ";\n",
             ix, flags=re.S)
 new_check = r"""  async check() {
